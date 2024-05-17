@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TypesShape, TypesTabs } from "../../typings/types";
+import { TypesTabs } from "../../typings/types";
 
 import * as S from "./styled";
 
@@ -10,8 +10,8 @@ interface ITab {
 }
 
 interface IProps {
-  clearShapes: () => void;
-  setShapeType: (value: React.SetStateAction<TypesShape>) => void;
+  handleClickClear: () => void;
+  handleClickTab: (value: React.SetStateAction<TypesTabs>) => void;
 }
 
 const TABS: ITab[] = [
@@ -19,34 +19,28 @@ const TABS: ITab[] = [
   { id: 2, label: "Circle", value: "circle" },
   { id: 3, label: "Clear", value: "clear" },
   { id: 4, label: "Delete", value: "delete" },
+  { id: 5, label: "Change index", value: "change" },
 ];
 
-const Tabs: React.FC<IProps> = ({ setShapeType, clearShapes }: IProps) => {
-  /**
-   * States
-   */
-
+const Tabs: React.FC<IProps> = ({
+  handleClickClear,
+  handleClickTab,
+}: IProps) => {
   const [activeTab, setActiveTab] = useState<number | null>(null);
 
-  /**
-   * Handlers
-   */
-  const handleClickTab = (o: ITab) => {
+  const handleClickButton = (o: ITab) => {
     const { id, value } = o;
-    if (value === "box" || value === "circle") {
+    if (value !== "clear") {
       setActiveTab(id);
     }
     switch (value) {
-      case "box":
-        setShapeType("box");
-        break;
-      case "circle":
-        setShapeType("circle");
+      case "clear":
+        handleClickTab("");
+        setActiveTab(null);
+        handleClickClear();
         break;
       default:
-        setShapeType("");
-        setActiveTab(null);
-        clearShapes();
+        handleClickTab(value);
         break;
     }
   };
@@ -57,7 +51,7 @@ const Tabs: React.FC<IProps> = ({ setShapeType, clearShapes }: IProps) => {
         <S.TabButton
           $isActive={activeTab === o.id}
           key={o.id}
-          onClick={() => handleClickTab(o)}
+          onClick={() => handleClickButton(o)}
         >
           {o.label}
         </S.TabButton>

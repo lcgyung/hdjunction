@@ -1,11 +1,11 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { IUseDrawShape } from "../../typings/interfaces";
-import { TypesShape } from "../../typings/types";
+import { TypesShape, TypesTabs } from "../../typings/types";
 
 import * as S from "./styled";
 
 interface IProps {
-  shapeType: TypesShape;
+  tab: TypesTabs;
   shapes: IUseDrawShape[];
   currentShape: IUseDrawShape;
   setShapes: React.Dispatch<React.SetStateAction<IUseDrawShape[]>>;
@@ -13,13 +13,16 @@ interface IProps {
 }
 
 const Canvas: React.FC<IProps> = ({
-  shapeType,
+  tab,
   shapes,
   currentShape,
   setShapes,
   setCurrentShape,
 }: IProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const shapeType: TypesShape = useMemo(() => {
+    return tab === "box" || tab === "circle" ? tab : "";
+  }, [tab]);
 
   /**
    * 도형 시작 좌표 지정 / 도형 타입 선정
@@ -90,6 +93,54 @@ const Canvas: React.FC<IProps> = ({
   };
 
   /**
+   * 도형 삭제, 도형 순서 변경
+   * @param o
+   */
+  const handleClickShape = (o: IUseDrawShape) => {
+    // 선택기능 : 도형 삭제
+    if (tab === "delete") {
+      const isDeleteShapeConfirm = confirm(
+        "선택하신 도형을 삭제 하시겠습니까?"
+      );
+      if (isDeleteShapeConfirm) {
+        const newShapes = shapes
+          .filter((o1) => o1 !== o)
+          .map((o1, index) => {
+            return { ...o1, zIndex: index + 1 };
+          });
+        setShapes(newShapes);
+      }
+    }
+    // 선택기능: 도형 표시 순서 변경
+    else if (tab === "change") {
+      const changeIndex = prompt(
+        `변경하고자 하는 위치 순서 값을 입력해주세요.\n- 선택한 도형 인덱스 : (${o.zIndex})\n- 현재 인덱스를 제외한 다른 수\n- 선택 가능한 숫자 범위(1 ~ ${shapes.length})`
+      );
+      if (changeIndex && Number(changeIndex) <= shapes.length) {
+        const { zIndex: originIndex } = o;
+        const newArray: IUseDrawShape[] = JSON.parse(JSON.stringify(shapes));
+        const originTargetIndex = newArray.findIndex(
+          (o1) => o1.zIndex === Number(originIndex)
+        );
+        const changeTarget = newArray.find(
+          (o1) => o1.zIndex === Number(changeIndex)
+        );
+        const changeTargetIndex = newArray.findIndex(
+          (o1) => o1.zIndex === Number(changeIndex)
+        );
+        if (changeTarget && o) {
+          newArray[originTargetIndex] = { ...o, zIndex: Number(changeIndex) };
+          newArray[changeTargetIndex] = {
+            ...changeTarget,
+            zIndex: Number(originIndex),
+          };
+          setShapes(newArray);
+        }
+      }
+    }
+  };
+
+  /**
    * 도형 그리기
    * @param payload 도형 좌표
    * @returns 도형 스타일
@@ -143,7 +194,11 @@ const Canvas: React.FC<IProps> = ({
       onMouseMove={handleMouseMove}
     >
       {shapes?.map((shape, index) => (
-        <div key={`${index}`} style={getShapeStyle(shape)} />
+        <div
+          key={`${index}`}
+          style={getShapeStyle(shape)}
+          onClick={() => handleClickShape(shape)}
+        />
       ))}
       {currentShape?.isDrawing && <div style={getShapeStyle(currentShape)} />}
     </S.Container>

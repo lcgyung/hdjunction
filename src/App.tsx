@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Canvas, Tabs } from "./components";
-import { TypesShape } from "./typings/types";
+import { TypesTabs } from "./typings/types";
 import { IUseDrawShape } from "./typings/interfaces";
 
 import * as S from "./styled";
@@ -20,23 +20,26 @@ const initShape: IUseDrawShape = {
 };
 
 const App: React.FC = () => {
-  const [shapeType, setShapeType] = React.useState<TypesShape>("");
+  const [tab, setTab] = React.useState<TypesTabs>("");
   const [shapes, setShapes] = useState<IUseDrawShape[]>([]);
   const [currentShape, setCurrentShape] = useState<IUseDrawShape>(initShape);
 
-  const savedShapes = localStorage.getItem(CONSTANTS.STORAGE_KEY_SAVED_SHAPES);
-
   useEffect(() => {
-    if (savedShapes && !shapes?.length) {
+    const savedShapes = localStorage.getItem(
+      CONSTANTS.STORAGE_KEY_SAVED_SHAPES
+    );
+    if (savedShapes) {
       const loadedRects = JSON.parse(savedShapes);
       setShapes(loadedRects);
     }
-  }, [savedShapes, shapes]);
+  }, []);
 
   useEffect(() => {
     if (shapes?.length) {
       const savedNewShapes = JSON.stringify(shapes);
       localStorage.setItem(CONSTANTS.STORAGE_KEY_SAVED_SHAPES, savedNewShapes);
+    } else {
+      localStorage.removeItem(CONSTANTS.STORAGE_KEY_SAVED_SHAPES);
     }
   }, [shapes]);
 
@@ -48,9 +51,9 @@ const App: React.FC = () => {
 
   return (
     <S.Container>
-      <Tabs clearShapes={clearShapes} setShapeType={setShapeType} />
+      <Tabs handleClickClear={clearShapes} handleClickTab={setTab} />
       <Canvas
-        shapeType={shapeType}
+        tab={tab}
         shapes={shapes}
         currentShape={currentShape}
         setShapes={setShapes}
