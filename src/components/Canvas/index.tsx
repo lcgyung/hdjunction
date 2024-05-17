@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useRef } from "react";
 import { IUseDrawShape } from "../../typings/interfaces";
 import { TypesShape, TypesTabs } from "../../typings/types";
 
@@ -6,6 +6,7 @@ import * as S from "./styled";
 
 interface IProps {
   tab: TypesTabs;
+  shapeType: TypesShape;
   shapes: IUseDrawShape[];
   currentShape: IUseDrawShape;
   setShapes: React.Dispatch<React.SetStateAction<IUseDrawShape[]>>;
@@ -14,15 +15,13 @@ interface IProps {
 
 const Canvas: React.FC<IProps> = ({
   tab,
+  shapeType,
   shapes,
   currentShape,
   setShapes,
   setCurrentShape,
 }: IProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const shapeType: TypesShape = useMemo(() => {
-    return tab === "box" || tab === "circle" ? tab : "";
-  }, [tab]);
 
   /**
    * 도형 시작 좌표 지정 / 도형 타입 선정
@@ -96,7 +95,7 @@ const Canvas: React.FC<IProps> = ({
    * 도형 삭제, 도형 순서 변경
    * @param o
    */
-  const handleClickShape = (o: IUseDrawShape) => {
+  const handleClick = (o: IUseDrawShape) => {
     // 선택기능 : 도형 삭제
     if (tab === "delete") {
       const isDeleteShapeConfirm = confirm(
@@ -140,52 +139,6 @@ const Canvas: React.FC<IProps> = ({
     }
   };
 
-  /**
-   * 도형 그리기
-   * @param payload 도형 좌표
-   * @returns 도형 스타일
-   */
-  const getShapeStyle = (payload: IUseDrawShape) => {
-    const { shapeType: type, startX, startY, endX, endY, zIndex } = payload;
-    let left = 0;
-    let top = 0;
-    let width = 0;
-    let height = 0;
-
-    // Circle
-    if (type === "circle") {
-      const centerX = (startX + endX) / 2;
-      const centerY = (startY + endY) / 2;
-      const radius =
-        Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)) / 2;
-
-      left = centerX - radius;
-      top = centerY - radius;
-      width = 2 * radius;
-      height = 2 * radius;
-    }
-    // Box
-    else if (type === "box") {
-      left = Math.min(startX, endX);
-      top = Math.min(startY, endY);
-      width = Math.abs(startX - endX);
-      height = Math.abs(startY - endY);
-    }
-
-    const borderRadius = type === "circle" ? "50%" : "none";
-
-    return {
-      zIndex,
-      borderRadius,
-      border: "1px solid black",
-      position: "absolute" as const,
-      left: `${left}px`,
-      top: `${top}px`,
-      width: `${width}px`,
-      height: `${height}px`,
-    };
-  };
-
   return (
     <S.Container
       ref={containerRef}
@@ -194,13 +147,27 @@ const Canvas: React.FC<IProps> = ({
       onMouseMove={handleMouseMove}
     >
       {shapes?.map((shape, index) => (
-        <div
+        <S.ShapeItem
+          $shapeType={shape.shapeType}
+          $startX={shape.startX}
+          $startY={shape.startY}
+          $endX={shape.endX}
+          $endY={shape.endY}
+          $zIndex={shape.zIndex}
           key={`${index}`}
-          style={getShapeStyle(shape)}
-          onClick={() => handleClickShape(shape)}
+          onClick={() => handleClick(shape)}
         />
       ))}
-      {currentShape?.isDrawing && <div style={getShapeStyle(currentShape)} />}
+      {currentShape?.isDrawing && (
+        <S.ShapeItem
+          $shapeType={shapeType}
+          $startX={currentShape.startX}
+          $startY={currentShape.startY}
+          $endX={currentShape.endX}
+          $endY={currentShape.endY}
+          $zIndex={currentShape.zIndex}
+        />
+      )}
     </S.Container>
   );
 };

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Canvas, Tabs } from "./components";
-import { TypesTabs } from "./typings/types";
+import { TypesShape, TypesTabs } from "./typings/types";
 import { IUseDrawShape } from "./typings/interfaces";
 
 import * as S from "./styled";
@@ -23,6 +23,10 @@ const App: React.FC = () => {
   const [tab, setTab] = React.useState<TypesTabs>("");
   const [shapes, setShapes] = useState<IUseDrawShape[]>([]);
   const [currentShape, setCurrentShape] = useState<IUseDrawShape>(initShape);
+
+  const shapeType: TypesShape = useMemo(() => {
+    return tab === "box" || tab === "circle" ? tab : "";
+  }, [tab]);
 
   useEffect(() => {
     const savedShapes = localStorage.getItem(
@@ -54,6 +58,7 @@ const App: React.FC = () => {
       <Tabs handleClickClear={clearShapes} handleClickTab={setTab} />
       <Canvas
         tab={tab}
+        shapeType={shapeType}
         shapes={shapes}
         currentShape={currentShape}
         setShapes={setShapes}

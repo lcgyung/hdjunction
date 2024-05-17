@@ -27,19 +27,16 @@ const Tabs: React.FC<IProps> = ({
   handleClickTab,
 }: IProps) => {
   const [activeTab, setActiveTab] = useState<number | null>(null);
-
   const handleClickButton = (o: ITab) => {
     const { id, value } = o;
-    if (value !== "clear") {
-      setActiveTab(id);
-    }
     switch (value) {
       case "clear":
-        handleClickTab("");
         setActiveTab(null);
+        handleClickTab("");
         handleClickClear();
         break;
       default:
+        setActiveTab(id);
         handleClickTab(value);
         break;
     }
