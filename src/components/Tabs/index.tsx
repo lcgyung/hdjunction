@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TypesTabs } from "../../typings/types";
+import { TypesShape, TypesTabs } from "../../typings/types";
 
 import * as S from "./styled";
 
@@ -11,13 +11,14 @@ interface ITab {
 
 interface IProps {
   clearShapes: () => void;
-  setShapeType: (value: React.SetStateAction<TypesTabs>) => void;
+  setShapeType: (value: React.SetStateAction<TypesShape>) => void;
 }
 
 const TABS: ITab[] = [
   { id: 1, label: "Box", value: "box" },
   { id: 2, label: "Circle", value: "circle" },
   { id: 3, label: "Clear", value: "clear" },
+  { id: 4, label: "Delete", value: "delete" },
 ];
 
 const Tabs: React.FC<IProps> = ({ setShapeType, clearShapes }: IProps) => {
@@ -43,7 +44,7 @@ const Tabs: React.FC<IProps> = ({ setShapeType, clearShapes }: IProps) => {
         setShapeType("circle");
         break;
       default:
-        setShapeType("clear");
+        setShapeType("");
         setActiveTab(null);
         clearShapes();
         break;
